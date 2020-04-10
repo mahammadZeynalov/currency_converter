@@ -78,12 +78,12 @@ async function convertMoney(e) {
         return;
     }
     console.log(e.target);
-    const topCurFrom = document.querySelector('.top-currencies-from');
+    // const topCurFrom = document.querySelector('.top-currencies-from');
 
-    if(topCurFrom.contains(e.target) || e.target == inputFrom || selectFrom.contains(e.target)) {
-        inputTo.value = inputFrom.value * info[0].rates[currencyTo];
-    } else {
+    if(e.target == inputTo) {
         inputFrom.value = inputTo.value * info[1].rates[currencyFrom];
+    } else {
+        inputTo.value = inputFrom.value * info[0].rates[currencyTo];
     }
     
     let fromCurElement = document.querySelector('.current-rate-from');
