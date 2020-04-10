@@ -1,0 +1,66 @@
+* {
+    box-sizing: border-box;
+}
+
+.app-parent {
+    display: flex;
+    justify-content: space-around;
+    width: 650px;
+}
+
+.left-block {
+    width: 260px;
+}
+
+.drop-down {
+    display: flex;
+    list-style: none;
+    padding-left: 0;
+    border-radius: 3px;
+}
+
+.top-cur {
+    width: 51px;
+    height: 30px;
+    text-align: center;
+    /* align-self: center; */
+    border: 1px solid #E5E5E5;
+    color: #C6C6C6;
+}
+
+.list {
+    width: 70px;
+}
+
+.select {
+    width: 100%;
+    height: 100%;
+}
+
+.top-cur:hover {
+    cursor: pointer;
+    background: #833AE0;
+    color: white;
+}
+
+.selected-from-cur {
+    background-color: #833AE0;
+    color: white;
+}
+
+.selected-to-cur {
+    background-color: #833AE0;
+    color: white;
+}
+
+.right-block {
+    width: 260px;
+}
+
+.calculation-block {
+    height: 102px;
+}
+
+.input-number {
+    height: 40px;
+}
