@@ -1,0 +1,34 @@
+{
+  "name": "mahammadz_project_m4",
+  "version": "1.0.0",
+  "description": "currency converter",
+  "main": "script.js",
+  "scripts": {
+    "start": "node script.js",
+    "build": "webpack",
+    "build:prod": "webpack --config webpack.prod.config.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/etnograf23/MahammadZ_project_m4.git"
+  },
+  "keywords": [
+    "m4"
+  ],
+  "author": "Mahammad Zeynalov",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/etnograf23/MahammadZ_project_m4/issues"
+  },
+  "homepage": "https://github.com/etnograf23/MahammadZ_project_m4#readme",
+  "dependencies": {
+    "chart.js": "^2.9.3"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.9.0",
+    "@babel/preset-env": "^7.9.5",
+    "babel-loader": "^8.1.0",
+    "webpack": "^4.42.1",
+    "webpack-cli": "^3.3.11"
+  }
+}

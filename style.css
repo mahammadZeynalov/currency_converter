@@ -151,3 +151,8 @@ main {
     width: 50px;
     height: 40px;
 }
+
+.my-chart {
+    width: 400px;
+    height: 400px;
+}
