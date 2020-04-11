@@ -7,6 +7,8 @@ const selectTo = document.querySelector('.select-currencies-to');
 const inputFrom = document.querySelector('.input-from');
 const inputTo = document.querySelector('.input-to');
 
+const switcher = document.querySelector('.change-arrows');
+
 let data = loadAvailableCurrencies();
 fillDropDownLists(data);
 
@@ -15,17 +17,21 @@ inputTo.addEventListener('input', convertMoney);
 addEventListenersToCurrenciesFrom();
 addEventListenersToCurrenciesTo();
 
+window.addEventListener('load', (e) => {
+    convertMoney(e);
+});
+
 selectFrom.addEventListener('change', (e)=> {
     resetColorsFrom();
-    // e.target.style.backgroundColor = 'red';
     convertMoney(e);
-    loadCurrenciesRate();
 });
+
 selectTo.addEventListener('change', (e)=> {
     resetColorsTo();
     convertMoney(e);
-    loadCurrenciesRate();
 });
+
+switcher.addEventListener('click', switcherDivHandler)
 
 function addEventListenersToCurrenciesFrom() {
     topCurrenciesFrom.forEach((cur) => {
@@ -33,7 +39,6 @@ function addEventListenersToCurrenciesFrom() {
             resetColorsFrom();
             cur.classList.add('selected-from-cur');
             convertMoney(e);
-            loadCurrenciesRate();
         });
     });
 }
@@ -44,7 +49,6 @@ function addEventListenersToCurrenciesTo() {
             resetColorsTo();
             cur.classList.add('selected-to-cur');
             convertMoney(e);
-            loadCurrenciesRate();
         });
     });
 }
@@ -52,7 +56,6 @@ function addEventListenersToCurrenciesTo() {
 async function convertMoney(e) {
     formatInput();
     let info = await sendRequest();
-    console.log(info);
 
     let currencyFrom;
     let currencyTo;
@@ -77,13 +80,14 @@ async function convertMoney(e) {
         inputTo.value = 1;
         return;
     }
-    console.log(e.target);
-    // const topCurFrom = document.querySelector('.top-currencies-from');
 
-    if(e.target == inputTo) {
-        inputFrom.value = inputTo.value * info[1].rates[currencyFrom];
+    let selectedFrom = document.querySelector('.selected-from-cur');
+    let selectedTo = document.querySelector('.selected-to-cut');
+
+    if(e.target == inputFrom || e.target == selectFrom || e.target == selectedFrom) {
+        inputTo.value = (inputFrom.value * info[0].rates[currencyTo]).toFixed(2);
     } else {
-        inputTo.value = inputFrom.value * info[0].rates[currencyTo];
+        inputFrom.value = (inputTo.value * info[1].rates[currencyFrom]).toFixed(2);
     }
     
     let fromCurElement = document.querySelector('.current-rate-from');
@@ -107,6 +111,10 @@ function resetColorsTo() {
 
 async function loadAvailableCurrencies() {
     let response = await fetch('https://api.ratesapi.io/api/latest');
+    if(response.status != 200) {
+        alert('Не удалось загрузить данные о валютах.');
+        return;
+    }
     let data = await response.json();
     return data;
 }
@@ -146,11 +154,20 @@ async function sendRequest() {
         return false;
     }
 
-    let dataFromResponse = await fetch(`https://api.ratesapi.io/api/latest?base=${currencyFrom}&symbols=${currencyTo}`)
+    let dataFromResponse = await fetch(`https://api.ratesapi.io/api/latest?base=${currencyFrom}&symbols=${currencyTo}`);
+    if(dataFromResponse.status != 200) {
+        alert('Не удалось запросить данные о, исходной валюте. Пожалуйсто, попробуйте еще раз.');
+        return;
+    }
+    console.log(dataFromResponse);
     let dataFrom = await dataFromResponse.json();
-    let dataToResponse = await fetch(`https://api.ratesapi.io/api/latest?base=${currencyTo}&symbols=${currencyFrom}`)
-    let dataTo = await dataToResponse.json();
 
+    let dataToResponse = await fetch(`https://api.ratesapi.io/api/latest?base=${currencyTo}&symbols=${currencyFrom}`)
+    if(dataToResponse.status != 200) {
+        alert('Не удалось запросить данные о конечной валюте. Пожалуйсто, попробуйте еще раз.');
+        return;
+    }
+    let dataTo = await dataToResponse.json();
     let responses = [];
     responses.push(dataFrom);
     responses.push(dataTo);
@@ -161,25 +178,37 @@ function formatInput() {
     inputFrom.value = inputFrom.value.replace(',', '.');
 }
 
-async function loadCurrenciesRate() {
-
+function switcherDivHandler() {
+    let parent = document.querySelector('.app-parent');
+    let left = document.querySelector('.app-parent > div:first-child');
+    let center = document.querySelector('.central-block');
+    let right = document.querySelector('.app-parent > div:last-child');
+    let save = left.querySelector('div:first-child').innerText;
+    left.querySelector('div:first-child').innerText = right.querySelector('div:first-child').innerText;
+    right.querySelector('div:first-child').innerText = save;
+    parent.innerHTML = '';
+    parent.append(right, center, left);
 }
 
-async function displayCurrentRate() {
+// async function loadCurrenciesRate() {
 
-}
+// }
 
-function changeCurrencyPositions() {
+// async function displayCurrentRate() {
 
-}
+// }
 
-function loadDelay() {
+// function changeCurrencyPositions() {
 
-}
+// }
 
-function isCurrenciesAreSame() {
+// function loadDelay() {
 
-}
+// }
+
+// function isCurrenciesAreSame() {
+
+// }
 
 
 

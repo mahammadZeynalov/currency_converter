@@ -6,22 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Конвертер валют</title>
     <link rel="stylesheet" href="style.css">
+    <script src="jquery-3.4.1.min.js"></script>
 </head>
-
 <body>
-    <!-- <header>
-        <div class="bank-icon"></div>
-        <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
+    <header class='shapka'>
+        <div class="bank-icon"><img src="bankIcon.png" alt="bankIcon"></div>
+        <ul class='nav'>
+            <li><a href="#">Банк</a></li>
+            <li><a href="#">Бизнес</a></li>
+            <li><a href="#">Инвестиции</a></li>
+            <li><a href="#">Страхование</a></li>
+            <li><a href="#">Мобайл</a></li>
+            <li><a href="#">Путешествие</a></li>
+            <li><a href="#">Развлечения</a></li>
         </ul>
-        <div class="enter-button"></div>
-    </header> -->
+        <div class="enter-button">Войти</div>
+    </header>
     <main>
         <div class="app-name">
             <h1>Конвертер валют онлайн</h1>
@@ -37,12 +37,12 @@
                     <li class="list"><select class='select-currencies-from select'></select></li>
                 </ul>
                 <div class="calculation-box">
-                    <input class="input-number input-from" type = 'text' value='1'>
-                    <div class="current-rate-from">1 RUR = 0.0132 USD</div>
+                    <input class="input-number input-from" type = 'text'>
+                    <div class="current-rate-from"></div>
                 </div>
             </div>
             <div class="central-block">
-                <div class="change-arrows"></div>
+                <div class="change-arrows"><img src='transfer.png' class='transfer' alt='transfer' /></div>
             </div>
             <div class="right-block">
                 <div class="i-have">Хочу приобрести</div>
@@ -54,8 +54,8 @@
                     <li class="list"><select class='select-currencies-to select'></select></li>
                 </ul>
                 <div class="calculation-box">
-                    <input class="input-number input-to" type = 'text'>
-                    <div class="current-rate-to">1 USD = 75.7499 RUR</div>
+                    <input class="input-number input-to" type = 'text' value='1'>
+                    <div class="current-rate-to"></div>
                 </div>
             </div>
         </div>
