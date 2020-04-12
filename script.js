@@ -1,5 +1,7 @@
 // Declaring global variables.
 const Chart = require('chart.js');
+// const apiKey = `35e64c0d61fe18f5a400a522c1ea7cdb`;
+
 // RUB, USD, EUR, GBP
 const topCurrenciesFrom = document.querySelectorAll('.top-currencies-from .top-cur');
 const topCurrenciesTo = document.querySelectorAll('.top-currencies-to .top-cur');
@@ -256,26 +258,14 @@ function switcherDivHandler() {
 function prepareDates() {
     let arr = [];
     const time = new Date();
-    let str1 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str1);
-    time.setDate(time.getDate() - 1);
-    let str2 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str2);
-    time.setDate(time.getDate() - 1);
-    let str3 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str3);
-    time.setDate(time.getDate() - 1);
-    let str4 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str4);
-    time.setDate(time.getDate() - 1);
-    let str5 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str5);
-    time.setDate(time.getDate() - 1);
-    let str6 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str6);
-    time.setDate(time.getDate() - 1);
-    let str7 = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
-    arr.push(str7);
+    const dayInWeek = 7;
+    let dateInString = '';
+    for(let i = 0; i < dayInWeek; i++) {
+        dateInString = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
+        arr.push(dateInString);
+        time.setDate(time.getDate() - 1);
+    }
+    console.log(arr);
     return arr;
 }
 
