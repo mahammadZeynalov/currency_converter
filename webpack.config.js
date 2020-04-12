@@ -1,21 +1,9 @@
 module.exports = {
-    mode: 'production',
+    mode: 'development',
     entry: './script.js',
+    watch: true,
     output: {
-        filename: './main.minified.js',
+        filename: './main.js',
     },
-     module: {
-        rules: [
-            {
-             test: /\.js$/,
-                use: {
-                    loader: 'babel-loader',
-                    options: {
-                        presets: ['@babel/preset-env'],
-                    },
-                },
-            },
-        ],
-      },
  };
  

@@ -1,6 +1,7 @@
 * {
     box-sizing: border-box;
     font-family: Roboto;
+    font-style: normal;
 }
 
 body {
@@ -31,7 +32,7 @@ body {
 .nav li a {
     text-decoration: none;
     color: #C6C6C6;
-    font-size: 20px;
+    font-size: 16px;
     line-height: 13px;
 }
 
@@ -43,9 +44,12 @@ body {
 }
 
 main {
-    position: absolute;
-    top: 25%;
-    left: 30%;
+    display:flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 20px;
 }
 
 .app-parent {
@@ -60,6 +64,7 @@ main {
 
 .i-have {
     color: #9F9F9F;
+    font-size: 14px;
 }
 
 .drop-down {
@@ -152,7 +157,30 @@ main {
     height: 40px;
 }
 
-.my-chart {
-    width: 400px;
-    height: 400px;
+.chart-div {
+    margin: 0 auto;
+    width: 700px;
+    height: 360px;
+    margin-top: 30px;
+}
+
+.loading-parent {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    display:none;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.loading-child {
+    position: absolute;
+    top: 40%;
+    left: 44%;
+    font-size: 40px;
+    width: 200px;
+    height: 70px;
+    background-color: white;
+    text-align: center;
+    padding-top: 8px;
+    border-radius: 3px;
 }
