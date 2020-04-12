@@ -252,6 +252,7 @@ function switcherDivHandler() {
 
 // https://fixer.io/documentation flactuation
 
+// Preparing array of dates stating with -7day from now
 function prepareDates() {
     let arr = [];
     const time = new Date();
@@ -278,6 +279,8 @@ function prepareDates() {
     return arr;
 }
 
+// Make request for each day of the week and get rates from them. The api is not working correctly, so sometimes you can see the same dates
+// I also calculating the min and max rates during the week in this function. Sorry for that.
 async function weeklyRequest(prepareDates) {
     let arr = prepareDates();
     let currencyFrom = detectSelectedCurrencies()[0];
@@ -300,8 +303,8 @@ async function weeklyRequest(prepareDates) {
     return [min, max, dataEachDay];
 }
 
+// Displaying the graph to the user.
 async function drawTable(weeklyRequest) {
-    let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
 
     let data = await weeklyRequest(prepareDates);
