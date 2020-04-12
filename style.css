@@ -95,6 +95,18 @@ main {
     height: 100%;
     border: none;
     cursor: pointer;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    justify-content: center;
+    text-align: center;
+    padding-left:7px;
+    background-image: url("images/chevron-arrow-down.png");
+    background-repeat: no-repeat;
+    background-position-x: 39px;
+    background-position-y: 5px;
+    background-size: 20px;
+    color: #C6C6C6;
+    font-size: 14px;
 }
 
 .top-cur:hover {
@@ -131,8 +143,9 @@ main {
     font-size: 20px;
     font-weight: 900;
     height: 40px;
-    width: 260px;
+    width: 220px;
     border: none;
+    margin-left:16px;
     /* border-radius: 3px; */
 }
 
