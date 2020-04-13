@@ -368,9 +368,13 @@ async function drawTable(yearRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
 
     let data = await yearRequest(prepareDates);
-    var ctx = document.getElementById('myChart').getContext('2d');
+    var ctx = document.querySelector('.myChart').getContext('2d');
 
-    let parametrs = {
+    let parametrs = {};
+    // parametrs.data.labels = [];
+    // parametrs.datasets.splice(0, 1);
+
+    parametrs = {
         // The type of chart we want to create
         type: 'line',
 
@@ -388,6 +392,9 @@ async function drawTable(yearRequest) {
         // Configuration options go here
         options: {
             events: [],
+            tooltips: {
+                mode: 'point'
+            },
             scales: {
                 yAxes: [{
                     ticks: {
@@ -433,5 +440,6 @@ async function drawTable(yearRequest) {
     for (let i = 0; i < dateStrings.length; i++) {
         parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
     }
+
     var chart = new Chart(ctx, parametrs);
 }
