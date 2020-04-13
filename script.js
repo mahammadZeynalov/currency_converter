@@ -30,7 +30,7 @@ let loadingTimer;
 
 
 // Convert the default input values (RUB/USD)
-window.addEventListener('load', () => {
+window.addEventListener('load', (e) => {
     convertMoney(e);
     drawTable(yearRequest);
 });
