@@ -60,6 +60,11 @@ selectFrom.addEventListener('change', (e) => {
     clearTimeout(convertTimer);
     clearTimeout(loadingTimer);
     resetColorsFrom();
+    let options = selectFrom.querySelectorAll('option');
+    selectFrom.style.backgroundColor = 'rgb(131,58,224)';
+    options.forEach((option) => {
+            option.style.backgroundColor = 'white';
+    });
     loadingHandler();
     convertHandler(e);
 });
@@ -68,6 +73,11 @@ selectTo.addEventListener('change', (e) => {
     clearTimeout(convertTimer);
     clearTimeout(loadingTimer);
     resetColorsTo();
+    let options = selectTo.querySelectorAll('option');
+    selectTo.style.backgroundColor = 'rgb(131,58,224)';
+    options.forEach((option) => {
+            option.style.backgroundColor = 'white';
+    });
     loadingHandler();
     convertHandler(e);
 });
