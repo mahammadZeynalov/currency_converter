@@ -28,8 +28,9 @@ fillDropDownLists(data);
 let convertTimer;
 let loadingTimer;
 
+
 // Convert the default input values (RUB/USD)
-window.addEventListener('load', (e) => {
+window.addEventListener('load', () => {
     convertMoney(e);
     drawTable(yearRequest);
 });
@@ -40,52 +41,60 @@ window.addEventListener('load', (e) => {
 // 3. during changing the value of input fields.
 // 4. Switching the currencies and input values by clicking on the arrow
 
-inputFrom.addEventListener('input', (e) => {
-    formatInput(e);
-    clearTimeout(convertTimer);
-    clearTimeout(loadingTimer);
-    loadingHandler();
-    convertHandler(e);
-});
+inputFrom.addEventListener('input', generalEventHandler);
 
-inputTo.addEventListener('input', (e) => {
-    formatInput(e);
-    clearTimeout(convertTimer);
-    clearTimeout(loadingTimer);
-    loadingHandler();
-    convertHandler(e);
-});
+inputTo.addEventListener('input', generalEventHandler);
 
-selectFrom.addEventListener('change', (e) => {
-    clearTimeout(convertTimer);
-    clearTimeout(loadingTimer);
-    resetColorsFrom();
-    // let options = selectFrom.querySelectorAll('option');
-    // selectFrom.style.backgroundColor = 'rgb(131,58,224)';
-    // options.forEach((option) => {
-    //         option.style.backgroundColor = 'white';
-    // });
-    loadingHandler();
-    convertHandler(e);
-});
+selectFrom.addEventListener('change', generalEventHandler);
 
-selectTo.addEventListener('change', (e) => {
-    clearTimeout(convertTimer);
-    clearTimeout(loadingTimer);
-    resetColorsTo();
-    // let options = selectTo.querySelectorAll('option');
-    // selectTo.style.backgroundColor = 'rgb(131,58,224)';
-    // options.forEach((option) => {
-    //         option.style.backgroundColor = 'white';
-    // });
-    loadingHandler();
-    convertHandler(e);
-});
+selectTo.addEventListener('change', generalEventHandler);
+
+switcher.addEventListener('click', switcherDivHandler);
 
 addEventListenersToCurrenciesFrom();
 addEventListenersToCurrenciesTo();
 
-switcher.addEventListener('click', switcherDivHandler);
+function generalEventHandler(e) {
+    if(e.target == selectFrom) {
+        resetColorsFrom();
+        coloringSelectFrom();
+    } else if (e.target == selectTo) {
+        resetColorsTo();
+        coloringSelectTo();
+    }
+
+    if(e.target == inputFrom || e.target == inputTo) {
+        formatInput(e);
+    }
+    clearTimeout(convertTimer);
+    clearTimeout(loadingTimer);
+    loadingHandler();
+    convertHandler(e);
+}
+
+function coloringSelectFrom() {
+    let options = selectFrom.querySelectorAll('option');
+    selectFrom.style.backgroundColor = 'rgb(131,58,224)';
+    options.forEach((option) => {
+            option.style.backgroundColor = 'white';
+    });
+}
+
+function coloringSelectTo() {
+    let options = selectTo.querySelectorAll('option');
+    selectTo.style.backgroundColor = 'rgb(131,58,224)';
+    options.forEach((option) => {
+            option.style.backgroundColor = 'white';
+    });
+}
+
+function resetColorSelectFrom() {
+    selectFrom.style.backgroundColor = 'white';
+}
+
+function resetColorSelectTo() {
+    selectTo.style.backgroundColor = 'white';
+}
 
 function loadingHandler() {
     loadingTimer = setTimeout(() => {
@@ -106,12 +115,10 @@ function convertHandler(e) {
 function addEventListenersToCurrenciesFrom() {
     topCurrenciesFrom.forEach((cur) => {
         cur.addEventListener('click', (e) => {
-            clearTimeout(convertTimer);
-            clearTimeout(loadingTimer);
+            resetColorSelectFrom();
             resetColorsFrom();
             cur.classList.add('selected-from-cur');
-            loadingHandler();
-            convertHandler(e);
+            generalEventHandler(e);
 
         });
     });
@@ -120,12 +127,10 @@ function addEventListenersToCurrenciesFrom() {
 function addEventListenersToCurrenciesTo() {
     topCurrenciesTo.forEach((cur) => {
         cur.addEventListener('click', (e) => {
-            clearTimeout(convertTimer);
-            clearTimeout(loadingTimer);
+            resetColorSelectTo();
             resetColorsTo();
             cur.classList.add('selected-to-cur');
-            loadingHandler();
-            convertHandler(e);
+            generalEventHandler(e);
         });
     });
 }
@@ -160,10 +165,11 @@ function enableInputs() {
 
 // convertMoney waits for request, calculates the result and shows it to user. Too much for one function - refactoring needed.
 async function convertMoney(e) {
-    let info = await sendRequest();
-
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
+    let selectedFrom = document.querySelector('.selected-from-cur');
+
+    let info = await sendRequest();
 
     if (info == false) {
         let fromCurElement = document.querySelector('.current-rate-from');
@@ -174,8 +180,6 @@ async function convertMoney(e) {
         inputTo.value = 1;
         return;
     }
-
-    let selectedFrom = document.querySelector('.selected-from-cur');
 
     if (e.target == inputFrom || e.target == selectFrom || e.target == selectedFrom) {
         inputTo.value = (inputFrom.value * info.rates[currencyTo]).toFixed(2);
@@ -252,9 +256,9 @@ function formatInput(e) {
 
 function switcherDivHandler() {
     let parent = document.querySelector('.app-parent');
-    let left = document.querySelector('.app-parent > div:first-child');
+    let left = document.querySelector('.app-parent > section:first-child');
     let center = document.querySelector('.central-block');
-    let right = document.querySelector('.app-parent > div:last-child');
+    let right = document.querySelector('.app-parent > section:last-child');
     let save = left.querySelector('div:first-child').innerText;
     left.querySelector('div:first-child').innerText = right.querySelector('div:first-child').innerText;
     right.querySelector('div:first-child').innerText = save;
@@ -289,7 +293,6 @@ async function yearRequest(prepareDates) {
 
     let data = await (await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`)).json();
     let rates = data.rates;
-    console.log(rates);
     let values = [];
 
     for(let key in rates) {
@@ -355,7 +358,6 @@ async function drawTable(yearRequest) {
     for(let i = 0; i < arrDateObj.length; i++) {
         test.push(arrDateObj[i].toISOString().slice(0,10));
     }
-    console.log(test);
     // parsing to month-day
     let parsedDates = [];
 
