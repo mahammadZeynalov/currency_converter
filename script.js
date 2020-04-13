@@ -290,6 +290,7 @@ async function yearRequest(prepareDates) {
     let data = await (await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`)).json();
     let rates = data.rates;
     let values = [];
+
     for(let key in rates) {
         values.push(rates[key][currencyTo]);
     }
@@ -301,8 +302,6 @@ async function yearRequest(prepareDates) {
     // console.log(min, max);
     return [min, max, data];
 }
-
-// yearRequest(prepareDates);
 
 // Displaying the graph to the user.
 async function drawTable(yearRequest) {
@@ -365,6 +364,7 @@ async function drawTable(yearRequest) {
 
     let rates = data[2].rates;
 
+    //filling the data
     for(let key in rates) {
         parametrs.data.datasets[0].data.push(rates[key][currencyTo]);
     }
