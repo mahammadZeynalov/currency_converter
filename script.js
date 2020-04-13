@@ -31,7 +31,7 @@ let loadingTimer;
 // Convert the default input values (RUB/USD)
 window.addEventListener('load', (e) => {
     convertMoney(e);
-    drawTable(weeklyRequest);
+    drawTable(yearRequest);
 });
 
 // User can interact with app by 3 ways: 
@@ -96,7 +96,7 @@ function loadingHandler() {
 
 function convertHandler(e) {
     convertTimer = setTimeout(() => {
-        drawTable(weeklyRequest);
+        drawTable(yearRequest);
         convertMoney(e);
         loading.style.display = 'none';
         enableInputs();
@@ -264,76 +264,66 @@ function switcherDivHandler() {
 
 // https://fixer.io/documentation flactuation
 
-// Preparing array of dates stating with -7day from now
+// Preparing array of dates for 3 monthes. 
 function prepareDates() {
     let arr = [];
     const time = new Date();
-    const dayInWeek = 7;
+    const monthes = 3;
     let dateInString = '';
-    for(let i = 0; i < dayInWeek; i++) {
+    for(let i = 0; i < monthes; i++) {
         dateInString = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
         arr.push(dateInString);
-        time.setDate(time.getDate() - 1);
+        time.setMonth(time.getMonth() - 1);
     }
-    console.log(arr);
     return arr;
 }
 
-// Make request for each day of the week and get rates from them. The api is not working correctly, so sometimes you can see the same dates
-// I also calculating the min and max rates during the week in this function. Sorry for that.
-async function weeklyRequest(prepareDates) {
+prepareDates();
+
+// Make request for each day of the 3 monthes and get rates from them. The api is not working correctly, so sometimes you can see the same dates or some dates are totally missed.
+// I also calculating the min and max rates during the period in this function. Sorry for that.
+async function yearRequest(prepareDates) {
     let arr = prepareDates();
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
 
-    let dataEachDay = [];
-
-    for (let i = 0; i < arr.length; i++) {
-        let data = await (await fetch(`https://api.ratesapi.io/api/${arr[i]}?base=${currencyFrom}&symbols=${currencyTo}`)).json();
-        dataEachDay.push(data);
+    let data = await (await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`)).json();
+    let rates = data.rates;
+    let values = [];
+    for(let key in rates) {
+        values.push(rates[key][currencyTo]);
     }
-    console.log(dataEachDay);
 
-    let rates = dataEachDay.map((day) => day.rates[currencyTo])
-    console.log(rates);
-
-    const min = Math.min.apply(null, rates);
-    const max = Math.max.apply(null, rates);
-    console.log(min, max);
-    return [min, max, dataEachDay];
+    const min = Math.min.apply(null, values);
+    const max = Math.max.apply(null, values);
+    // console.log(data);
+    // console.log(values);
+    // console.log(min, max);
+    return [min, max, data];
 }
 
+// yearRequest(prepareDates);
+
 // Displaying the graph to the user.
-async function drawTable(weeklyRequest) {
+async function drawTable(yearRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
 
-    let data = await weeklyRequest(prepareDates);
+    let data = await yearRequest(prepareDates);
     console.log(data);
     var ctx = document.getElementById('myChart').getContext('2d');
-    var chart = new Chart(ctx, {
+
+    let parametrs = {
         // The type of chart we want to create
         type: 'line',
 
         // The data for our dataset
         data: {
-            labels: [`${data[2][0].date}`,
-                    `${data[2][1].date}`,
-                    `${data[2][2].date}`,
-                    `${data[2][3].date}`,
-                    `${data[2][4].date}`,
-                    `${data[2][5].date}`,
-                    `${data[2][6].date}`],
+            labels: [],
             datasets: [{
                 label: 'Rate',
                 backgroundColor: 'rgb(208,236,222)',
                 borderColor: 'green',
-                data: [`${data[2][0].rates[currencyTo]}`,
-                        `${data[2][1].rates[currencyTo]}`,
-                        `${data[2][2].rates[currencyTo]}`,
-                        `${data[2][3].rates[currencyTo]}`,
-                        `${data[2][4].rates[currencyTo]}`,
-                        `${data[2][5].rates[currencyTo]}`,
-                        `${data[2][6].rates[currencyTo]}`]
+                data: []
             }]
         },
 
@@ -343,11 +333,40 @@ async function drawTable(weeklyRequest) {
                 yAxes: [{
                     ticks: {
                         max: data[1],
-                        min: data[0],
-                        stepSize: (data[1] - data[0])/6
+                        min: data[0]
                     }
                 }]
             }
         }
+    }
+    // get array of date string 
+    let dateStrings = Object.keys(data[2].rates);
+    // convert them to Date object
+    let arrDateObj = [];
+    for(let i = 0; i < dateStrings.length; i++) {
+        arrDateObj.push(new Date(dateStrings[i]));
+    }
+    // sort them in ascending order
+    arrDateObj.sort(function(a, b) {
+        return a - b;
     });
+    // parsing to month-day
+    let parsedDates = [];
+
+    for(let i = 0; i < arrDateObj.length; i++) {
+        parsedDates.push(arrDateObj[i].toISOString().slice(0,10).substring(5))
+    }
+    console.log(parsedDates);
+
+    //filling the labels
+    for(let i = 0; i < parsedDates.length; i++) {
+        parametrs.data.labels.push(parsedDates[i]);
+    }
+
+    let rates = data[2].rates;
+
+    for(let key in rates) {
+        parametrs.data.datasets[0].data.push(rates[key][currencyTo]);
+    }
+    var chart = new Chart(ctx, parametrs);
 }
