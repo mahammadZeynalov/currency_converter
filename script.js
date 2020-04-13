@@ -75,6 +75,7 @@ function generalEventHandler(e) {
         if(isSameCurrencies() == true) {
             clearTimeout(convertTimer);
             clearTimeout(loadingTimer);
+            drawTable(yearRequest);
             return;
         }
         clearTimeout(convertTimer);
@@ -350,7 +351,14 @@ async function yearRequest(prepareDates) {
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
 
-    let data = await (await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`)).json();
+    let _data = await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`);
+    if(_data.status != 200) {
+        alert('Wrong request!');
+        return false;
+    }
+
+    let data = await _data.json();
+
     let rates = data.rates;
     let values = [];
 
@@ -366,6 +374,11 @@ async function yearRequest(prepareDates) {
 // Displaying the graph to the user.
 async function drawTable(yearRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
+
+    if(yearRequest(prepareDates) == false) {
+        console.error('Поймал ошибку');
+        return;
+    }
 
     let data = await yearRequest(prepareDates);
     var ctx = document.querySelector('.myChart').getContext('2d');
