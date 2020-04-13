@@ -28,10 +28,15 @@ fillDropDownLists(data);
 let convertTimer;
 let loadingTimer;
 
+let globalFromCurrency = 'RUB';
+let globalToCurrency = 'USD';
+let globalRate = 0;
+
 
 // Convert the default input values (RUB/USD)
 window.addEventListener('load', (e) => {
-    convertMoney(e);
+    // convertMoney(e);
+    firstRequest();
     drawTable(yearRequest);
 });
 
@@ -55,7 +60,7 @@ addEventListenersToCurrenciesFrom();
 addEventListenersToCurrenciesTo();
 
 function generalEventHandler(e) {
-    if(e.target == selectFrom) {
+    if (e.target == selectFrom) {
         resetColorsFrom();
         coloringSelectFrom();
     } else if (e.target == selectTo) {
@@ -63,20 +68,27 @@ function generalEventHandler(e) {
         coloringSelectTo();
     }
 
-    if(e.target == inputFrom || e.target == inputTo) {
+    if (e.target == inputFrom || e.target == inputTo) {
         formatInput(e);
+        convertMoney(e);
+    } else {
+        if(isSameCurrencies() == true) {
+            clearTimeout(convertTimer);
+            clearTimeout(loadingTimer);
+            return;
+        }
+        clearTimeout(convertTimer);
+        clearTimeout(loadingTimer);
+        loadingHandler();
+        convertHandler(e);
     }
-    clearTimeout(convertTimer);
-    clearTimeout(loadingTimer);
-    loadingHandler();
-    convertHandler(e);
 }
 
 function coloringSelectFrom() {
     let options = selectFrom.querySelectorAll('option');
     selectFrom.style.backgroundColor = 'rgb(131,58,224)';
     options.forEach((option) => {
-            option.style.backgroundColor = 'white';
+        option.style.backgroundColor = 'white';
     });
 }
 
@@ -84,7 +96,7 @@ function coloringSelectTo() {
     let options = selectTo.querySelectorAll('option');
     selectTo.style.backgroundColor = 'rgb(131,58,224)';
     options.forEach((option) => {
-            option.style.backgroundColor = 'white';
+        option.style.backgroundColor = 'white';
     });
 }
 
@@ -100,7 +112,7 @@ function loadingHandler() {
     loadingTimer = setTimeout(() => {
         loading.style.display = 'block';
         disableInputs();
-    }, 1000)
+    }, 1500)
 }
 
 function convertHandler(e) {
@@ -168,29 +180,32 @@ async function convertMoney(e) {
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
     let selectedFrom = document.querySelector('.selected-from-cur');
+    let fromCurElement = document.querySelector('.current-rate-from');
+    let ToCurElement = document.querySelector('.current-rate-to');
 
-    let info = await sendRequest();
-
-    if (info == false) {
-        let fromCurElement = document.querySelector('.current-rate-from');
-        fromCurElement.innerText = `1 ${currencyFrom} = ${1} ${currencyFrom}`;
-        let ToCurElement = document.querySelector('.current-rate-to');
-        ToCurElement.innerText = `1 ${currencyFrom} = ${1} ${currencyFrom}`;
-        inputFrom.value = 1;
-        inputTo.value = 1;
+    if (isSameCurrencies() == true) {
         return;
     }
 
-    if (e.target == inputFrom || e.target == selectFrom || e.target == selectedFrom) {
-        inputTo.value = (inputFrom.value * info.rates[currencyTo]).toFixed(2);
-    } else {
-        inputFrom.value = (inputTo.value * (1 / info.rates[currencyTo])).toFixed(2);
+    if (isNeedForRequest(e) == false) {
+        return;
     }
 
-    let fromCurElement = document.querySelector('.current-rate-from');
-    fromCurElement.innerText = `1 ${currencyFrom} = ${info.rates[currencyTo].toFixed(2)} ${currencyTo}`;
-    let ToCurElement = document.querySelector('.current-rate-to');
-    ToCurElement.innerText = `1 ${currencyTo} = ${(1 / info.rates[currencyTo]).toFixed(2)} ${currencyFrom}`;
+    let data = await sendRequest();
+    globalRate = data.rates[currencyTo];
+    globalFromCurrency = currencyFrom;
+    globalToCurrency = currencyTo;
+
+    //calculation
+    if (e.target == inputFrom || e.target == selectFrom || e.target == selectedFrom) {
+        inputTo.value = (inputFrom.value * globalRate).toFixed(2);
+    } else {
+        inputFrom.value = (inputTo.value * (1 / globalRate)).toFixed(2);
+    }
+
+    //rate labels for both sides
+    fromCurElement.innerText = `1 ${currencyFrom} = ${globalRate.toFixed(2)} ${currencyTo}`;
+    ToCurElement.innerText = `1 ${currencyTo} = ${(1 / globalRate).toFixed(2)} ${currencyFrom}`;
 
 }
 
@@ -233,13 +248,57 @@ async function fillDropDownLists(data) {
     });
 }
 
+function isSameCurrencies() {
+    let currencyFrom = detectSelectedCurrencies()[0];
+    let currencyTo = detectSelectedCurrencies()[1];
+    let fromCurElement = document.querySelector('.current-rate-from');
+    let ToCurElement = document.querySelector('.current-rate-to');
+
+    if (currencyFrom == currencyTo) {
+        fromCurElement.innerText = `1 ${currencyFrom} = ${1} ${currencyFrom}`;
+        ToCurElement.innerText = `1 ${currencyFrom} = ${1} ${currencyFrom}`;
+        inputTo.value = inputFrom.value;
+        return true;
+    }
+    return false;
+}
+
+async function firstRequest() {
+    let fromCurElement = document.querySelector('.current-rate-from');
+    let ToCurElement = document.querySelector('.current-rate-to');
+
+    let request = await fetch(`https://api.ratesapi.io/api/latest?base=USD&symbols=RUB`);
+    if(request.status != 200) {
+        alert('Не удалось запросить данные о валюте. Попробуйте заново.');
+        return
+    }
+    let data = await request.json();
+    globalRate = data.rates['RUB'];
+
+    fromCurElement.innerText = `1 RUB = ${(1 / data.rates['RUB']).toFixed(2)} USD`;
+    ToCurElement.innerText = `1 USD = ${data.rates['RUB'].toFixed(2)} RUB`;
+    inputFrom.value = (inputTo.value * data.rates['RUB']).toFixed(2);
+}
+
+function isNeedForRequest(e) {
+    let currencyFrom = detectSelectedCurrencies()[0];
+    let currencyTo = detectSelectedCurrencies()[1];
+    let selectedFrom = document.querySelector('.selected-from-cur');
+
+    if (currencyFrom === globalFromCurrency && currencyTo === globalToCurrency) {
+        if (e.target == inputFrom || e.target == selectFrom || e.target == selectedFrom) {
+            inputTo.value = (inputFrom.value * globalRate).toFixed(2);
+        } else {
+            inputFrom.value = (inputTo.value * globalRate).toFixed(2);
+        }
+        return false;
+    }
+    return true;
+}
+
 async function sendRequest() {
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
-
-    if (currencyFrom == currencyTo) {
-        return false;
-    }
 
     let dataFromResponse = await fetch(`https://api.ratesapi.io/api/latest?base=${currencyFrom}&symbols=${currencyTo}`);
     if (dataFromResponse.status != 200) {
@@ -274,7 +333,7 @@ function prepareDates() {
     const time = new Date();
     const monthes = 2;
     let dateInString = '';
-    for(let i = 0; i < monthes; i++) {
+    for (let i = 0; i < monthes; i++) {
         dateInString = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
         arr.push(dateInString);
         time.setMonth(time.getMonth() - 1);
@@ -282,7 +341,7 @@ function prepareDates() {
     return arr;
 }
 
-prepareDates();
+// prepareDates();
 
 // Make request for each day of the 3 monthes and get rates from them. The api is not working correctly, so sometimes you can see the same dates or some dates are totally missed.
 // I also calculating the min and max rates during the period in this function. Sorry for that.
@@ -295,7 +354,7 @@ async function yearRequest(prepareDates) {
     let rates = data.rates;
     let values = [];
 
-    for(let key in rates) {
+    for (let key in rates) {
         values.push(rates[key][currencyTo]);
     }
 
@@ -346,32 +405,32 @@ async function drawTable(yearRequest) {
     let dateStrings = Object.keys(data[2].rates);
     // convert them to Date object
     let arrDateObj = [];
-    for(let i = 0; i < dateStrings.length; i++) {
+    for (let i = 0; i < dateStrings.length; i++) {
         arrDateObj.push(new Date(dateStrings[i]));
     }
     // sort dates in ascending order
-    arrDateObj.sort(function(a, b) {
+    arrDateObj.sort(function (a, b) {
         return a - b;
     });
 
     let test = [];
-    for(let i = 0; i < arrDateObj.length; i++) {
-        test.push(arrDateObj[i].toISOString().slice(0,10));
+    for (let i = 0; i < arrDateObj.length; i++) {
+        test.push(arrDateObj[i].toISOString().slice(0, 10));
     }
     // parsing to month-day
     let parsedDates = [];
 
-    for(let i = 0; i < arrDateObj.length; i++) {
-        parsedDates.push(arrDateObj[i].toISOString().slice(0,10).substring(5));
+    for (let i = 0; i < arrDateObj.length; i++) {
+        parsedDates.push(arrDateObj[i].toISOString().slice(0, 10).substring(5));
     }
 
     //filling the labels
-    for(let i = 0; i < parsedDates.length; i++) {
+    for (let i = 0; i < parsedDates.length; i++) {
         parametrs.data.labels.push(parsedDates[i]);
     }
 
     // filling data
-    for(let i = 0; i < dateStrings.length; i++) {
+    for (let i = 0; i < dateStrings.length; i++) {
         parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
     }
     var chart = new Chart(ctx, parametrs);
