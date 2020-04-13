@@ -60,11 +60,11 @@ selectFrom.addEventListener('change', (e) => {
     clearTimeout(convertTimer);
     clearTimeout(loadingTimer);
     resetColorsFrom();
-    let options = selectFrom.querySelectorAll('option');
-    selectFrom.style.backgroundColor = 'rgb(131,58,224)';
-    options.forEach((option) => {
-            option.style.backgroundColor = 'white';
-    });
+    // let options = selectFrom.querySelectorAll('option');
+    // selectFrom.style.backgroundColor = 'rgb(131,58,224)';
+    // options.forEach((option) => {
+    //         option.style.backgroundColor = 'white';
+    // });
     loadingHandler();
     convertHandler(e);
 });
@@ -73,11 +73,11 @@ selectTo.addEventListener('change', (e) => {
     clearTimeout(convertTimer);
     clearTimeout(loadingTimer);
     resetColorsTo();
-    let options = selectTo.querySelectorAll('option');
-    selectTo.style.backgroundColor = 'rgb(131,58,224)';
-    options.forEach((option) => {
-            option.style.backgroundColor = 'white';
-    });
+    // let options = selectTo.querySelectorAll('option');
+    // selectTo.style.backgroundColor = 'rgb(131,58,224)';
+    // options.forEach((option) => {
+    //         option.style.backgroundColor = 'white';
+    // });
     loadingHandler();
     convertHandler(e);
 });
@@ -268,7 +268,7 @@ function switcherDivHandler() {
 function prepareDates() {
     let arr = [];
     const time = new Date();
-    const monthes = 3;
+    const monthes = 2;
     let dateInString = '';
     for(let i = 0; i < monthes; i++) {
         dateInString = `${time.getFullYear()}-${time.getMonth() + 1}-${time.getDate()}`;
@@ -289,6 +289,7 @@ async function yearRequest(prepareDates) {
 
     let data = await (await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`)).json();
     let rates = data.rates;
+    console.log(rates);
     let values = [];
 
     for(let key in rates) {
@@ -297,9 +298,6 @@ async function yearRequest(prepareDates) {
 
     const min = Math.min.apply(null, values);
     const max = Math.max.apply(null, values);
-    // console.log(data);
-    // console.log(values);
-    // console.log(min, max);
     return [min, max, data];
 }
 
@@ -308,7 +306,6 @@ async function drawTable(yearRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
 
     let data = await yearRequest(prepareDates);
-    console.log(data);
     var ctx = document.getElementById('myChart').getContext('2d');
 
     let parametrs = {
@@ -338,6 +335,9 @@ async function drawTable(yearRequest) {
             }
         }
     }
+
+    let rates = data[2].rates;
+
     // get array of date string 
     let dateStrings = Object.keys(data[2].rates);
     // convert them to Date object
@@ -345,28 +345,31 @@ async function drawTable(yearRequest) {
     for(let i = 0; i < dateStrings.length; i++) {
         arrDateObj.push(new Date(dateStrings[i]));
     }
-    // sort them in ascending order
+    // sort dates in ascending order
     arrDateObj.sort(function(a, b) {
         return a - b;
     });
+
+    let test = [];
+    for(let i = 0; i < arrDateObj.length; i++) {
+        test.push(arrDateObj[i].toISOString().slice(0,10));
+    }
+    console.log(test);
     // parsing to month-day
     let parsedDates = [];
 
     for(let i = 0; i < arrDateObj.length; i++) {
-        parsedDates.push(arrDateObj[i].toISOString().slice(0,10).substring(5))
+        parsedDates.push(arrDateObj[i].toISOString().slice(0,10).substring(5));
     }
-    console.log(parsedDates);
 
     //filling the labels
     for(let i = 0; i < parsedDates.length; i++) {
         parametrs.data.labels.push(parsedDates[i]);
     }
 
-    let rates = data[2].rates;
-
-    //filling the data
-    for(let key in rates) {
-        parametrs.data.datasets[0].data.push(rates[key][currencyTo]);
+    // filling data
+    for(let i = 0; i < dateStrings.length; i++) {
+        parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
     }
     var chart = new Chart(ctx, parametrs);
 }
