@@ -314,17 +314,18 @@ async function drawTable(yearRequest) {
 
         // The data for our dataset
         data: {
-            labels: [],
+            labels: [], // filled below
             datasets: [{
-                label: 'Rate',
+                label: 'Currency rate',
                 backgroundColor: 'rgb(208,236,222)',
                 borderColor: 'green',
-                data: []
+                data: [] // filled below
             }]
         },
 
         // Configuration options go here
         options: {
+            events: [],
             scales: {
                 yAxes: [{
                     ticks: {
