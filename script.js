@@ -37,7 +37,7 @@ let globalRate = 0;
 window.addEventListener('load', (e) => {
     // convertMoney(e);
     firstRequest();
-    drawTable(yearRequest);
+    drawTable(historyRequest);
 });
 
 // User can interact with app by 3 ways: 
@@ -75,7 +75,7 @@ function generalEventHandler(e) {
         if(isSameCurrencies() == true) {
             clearTimeout(convertTimer);
             clearTimeout(loadingTimer);
-            drawTable(yearRequest);
+            drawTable(historyRequest);
             return;
         }
         clearTimeout(convertTimer);
@@ -113,16 +113,16 @@ function loadingHandler() {
     loadingTimer = setTimeout(() => {
         loading.style.display = 'block';
         disableInputs();
-    }, 1500)
+    }, 400)
 }
 
 function convertHandler(e) {
     convertTimer = setTimeout(() => {
-        drawTable(yearRequest);
+        drawTable(historyRequest);
         convertMoney(e);
         loading.style.display = 'none';
         enableInputs();
-    }, 2000)
+    }, 800)
 }
 
 function addEventListenersToCurrenciesFrom() {
@@ -328,7 +328,7 @@ function switcherDivHandler() {
 
 // https://fixer.io/documentation flactuation
 
-// Preparing array of dates for 3 monthes. 
+// Preparing array of dates for 2 monthes. 
 function prepareDates() {
     let arr = [];
     const time = new Date();
@@ -344,19 +344,14 @@ function prepareDates() {
 
 // prepareDates();
 
-// Make request for each day of the 3 monthes and get rates from them. The api is not working correctly, so sometimes you can see the same dates or some dates are totally missed.
+// Make request for each day of the 2 monthes and get rates from them. The api is not working correctly, so sometimes you can see the same dates or some dates are totally missed.
 // I also calculating the min and max rates during the period in this function. Sorry for that.
-async function yearRequest(prepareDates) {
+async function historyRequest(prepareDates) {
     let arr = prepareDates();
     let currencyFrom = detectSelectedCurrencies()[0];
     let currencyTo = detectSelectedCurrencies()[1];
 
     let _data = await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`);
-    if(_data.status != 200) {
-        alert('Wrong request!');
-        return false;
-    }
-
     let data = await _data.json();
 
     let rates = data.rates;
@@ -372,20 +367,12 @@ async function yearRequest(prepareDates) {
 }
 
 // Displaying the graph to the user.
-async function drawTable(yearRequest) {
+async function drawTable(historyRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
-
-    if(yearRequest(prepareDates) == false) {
-        console.error('Поймал ошибку');
-        return;
-    }
-
-    let data = await yearRequest(prepareDates);
     var ctx = document.querySelector('.myChart').getContext('2d');
-
     let parametrs = {};
-    // parametrs.data.labels = [];
-    // parametrs.datasets.splice(0, 1);
+
+    let data = await historyRequest(prepareDates);
 
     parametrs = {
         // The type of chart we want to create
@@ -454,5 +441,5 @@ async function drawTable(yearRequest) {
         parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
     }
 
-    var chart = new Chart(ctx, parametrs);
+    let chart = new Chart(ctx, parametrs);
 }
