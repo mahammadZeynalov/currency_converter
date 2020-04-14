@@ -1,6 +1,5 @@
 // Declaring global variables.
 const Chart = require('chart.js');
-// const apiKey = `35e64c0d61fe18f5a400a522c1ea7cdb`;
 
 // RUB, USD, EUR, GBP
 const topCurrenciesFrom = document.querySelectorAll('.top-currencies-from .top-cur');
@@ -28,14 +27,14 @@ fillDropDownLists(data);
 let convertTimer;
 let loadingTimer;
 
+// Global variables to save currencies name and rate
 let globalFromCurrency = 'RUB';
 let globalToCurrency = 'USD';
 let globalRate = 0;
 
 
 // Convert the default input values (RUB/USD)
-window.addEventListener('load', (e) => {
-    // convertMoney(e);
+window.addEventListener('load', () => {
     firstRequest();
     drawTable(historyRequest);
 });
@@ -326,9 +325,7 @@ function switcherDivHandler() {
     parent.append(right, center, left);
 }
 
-// https://fixer.io/documentation flactuation
-
-// Preparing array of dates for 2 monthes. 
+// Preparing array of dates for last 2 monthes. 
 function prepareDates() {
     let arr = [];
     const time = new Date();
@@ -342,9 +339,7 @@ function prepareDates() {
     return arr;
 }
 
-// prepareDates();
-
-// Make request for each day of the 2 monthes and get rates from them. The api is not working correctly, so sometimes you can see the same dates or some dates are totally missed.
+//Make request for a given period of dates. The api is not working correctly, so sometimes some dates are missed.
 // I also calculating the min and max rates during the period in this function. Sorry for that.
 async function historyRequest(prepareDates) {
     let arr = prepareDates();
