@@ -347,15 +347,15 @@ async function historyRequest(prepareDates) {
     let currencyTo = detectSelectedCurrencies()[1];
 
     let _data = await fetch(`https://api.exchangeratesapi.io/history?start_at=${arr[arr.length - 1]}&end_at=${arr[0]}&base=${currencyFrom}&symbols=${currencyTo}`);
+    if(_data.status != 200) {
+        console.log('Wrong request.');
+    }
     let data = await _data.json();
-
     let rates = data.rates;
     let values = [];
-
     for (let key in rates) {
         values.push(rates[key][currencyTo]);
     }
-
     const min = Math.min.apply(null, values);
     const max = Math.max.apply(null, values);
     return [min, max, data];
@@ -366,7 +366,6 @@ async function drawTable(historyRequest) {
     let currencyTo = detectSelectedCurrencies()[1];
     var ctx = document.querySelector('.myChart').getContext('2d');
     let parametrs = {};
-
     let data = await historyRequest(prepareDates);
 
     parametrs = {
@@ -403,37 +402,41 @@ async function drawTable(historyRequest) {
 
     let rates = data[2].rates;
 
-    // get array of date string 
-    let dateStrings = Object.keys(data[2].rates);
-    // convert them to Date object
-    let arrDateObj = [];
-    for (let i = 0; i < dateStrings.length; i++) {
-        arrDateObj.push(new Date(dateStrings[i]));
-    }
-    // sort dates in ascending order
-    arrDateObj.sort(function (a, b) {
-        return a - b;
-    });
-
-    let test = [];
-    for (let i = 0; i < arrDateObj.length; i++) {
-        test.push(arrDateObj[i].toISOString().slice(0, 10));
-    }
-    // parsing to month-day
-    let parsedDates = [];
-
-    for (let i = 0; i < arrDateObj.length; i++) {
-        parsedDates.push(arrDateObj[i].toISOString().slice(0, 10).substring(5));
-    }
-
-    //filling the labels
-    for (let i = 0; i < parsedDates.length; i++) {
-        parametrs.data.labels.push(parsedDates[i]);
-    }
-
-    // filling data
-    for (let i = 0; i < dateStrings.length; i++) {
-        parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
+    try {
+        let dateStrings = Object.keys(data[2].rates);
+        // convert them to Date object
+        let arrDateObj = [];
+        for (let i = 0; i < dateStrings.length; i++) {
+            arrDateObj.push(new Date(dateStrings[i]));
+        }
+        // sort dates in ascending order
+        arrDateObj.sort(function (a, b) {
+            return a - b;
+        });
+    
+        let test = [];
+        for (let i = 0; i < arrDateObj.length; i++) {
+            test.push(arrDateObj[i].toISOString().slice(0, 10));
+        }
+        // parsing to month-day
+        let parsedDates = [];
+    
+        for (let i = 0; i < arrDateObj.length; i++) {
+            parsedDates.push(arrDateObj[i].toISOString().slice(0, 10).substring(5));
+        }
+    
+        //filling the labels
+        for (let i = 0; i < parsedDates.length; i++) {
+            parametrs.data.labels.push(parsedDates[i]);
+        }
+    
+        // filling data
+        for (let i = 0; i < dateStrings.length; i++) {
+            parametrs.data.datasets[0].data.push(rates[test[i]][currencyTo]);
+        }
+    }catch {
+        isSameCurrencies();
+        console.log('Запрашиваемые валюты одинаковые.');
     }
 
     let chart = new Chart(ctx, parametrs);
